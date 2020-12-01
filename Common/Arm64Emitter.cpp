@@ -334,8 +334,11 @@ void ARM64XEmitter::FlushIcacheSection(const u8 *start, const u8 *end)
 	// Don't rely on GCC's __clear_cache implementation, as it caches
 	// icache/dcache cache line sizes, that can vary between cores on
 	// big.LITTLE architectures.
+	#if PPSSPP_PLATFORM(MAC)
+	// Using the mrs instruction here crashes on M1.
+	size_t isize = 64, dsize = 64;
+	#else
 	size_t isize, dsize;
-
 	if (cpu_info.sQuirks.bExynos8890DifferingCachelineSizes) {
 		// Enforce the minimum cache line size to be completely safe on these CPUs.
 		isize = 64;
@@ -351,7 +354,7 @@ void ARM64XEmitter::FlushIcacheSection(const u8 *start, const u8 *end)
 		icache_line_size = isize = icache_line_size < isize ? icache_line_size : isize;
 		dcache_line_size = dsize = dcache_line_size < dsize ? dcache_line_size : dsize;
 	}
-
+	#endif
 	u64 addr = (u64)start & ~(u64)(dsize - 1);
 	for (; addr < (u64)end; addr += dsize)
 		// use "civac" instead of "cvau", as this is the suggested workaround for
