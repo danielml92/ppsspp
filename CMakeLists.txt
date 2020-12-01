@@ -9,6 +9,7 @@ if(NOT ANDROID)
 endif()
 
 enable_language(ASM)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/sdl2)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
 add_definitions(-D__STDC_CONSTANT_MACROS)
@@ -64,7 +65,11 @@ if(MINGW AND NOT DEFINED USE_SYSTEM_FFMPEG)
 	set(USE_SYSTEM_FFMPEG ON)
 endif()
 
-if(NOT ANDROID AND NOT IOS)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+	set(MACOSX ON)
+endif()
+
+if(NOT ANDROID AND NOT IOS AND NOT MACOSX)
 	if(ARM_DEVICE OR SIMULATOR)
 		set(USING_EGL ON)
 	endif()
@@ -73,10 +78,6 @@ endif()
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 	set(LINUX ON)
 	add_definitions(-D__STDC_CONSTANT_MACROS)
-endif()
-
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-	set(MACOSX ON)
 endif()
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Android")
@@ -186,7 +187,7 @@ if(USING_EGL)
 	set(OPENGL_LIBRARIES ${OPENGL_LIBRARIES} ${EGL_LIBRARIES})
 endif()
 
-if(NOT LIBRETRO)
+if(NOT LIBRETRO AND NOT WINDOWS AND NOT ANDROID)
 	find_package(SDL2)
 endif()
 include(FindThreads)
@@ -763,7 +764,7 @@ if(NOT MSVC)
 endif()
 
 
-find_package(LibZip)
+find_package(LIBZIP)
 if(LIBZIP_FOUND AND USE_SYSTEM_LIBZIP)
 	add_definitions(-DSHARED_LIBZIP)
 else()
@@ -976,7 +977,7 @@ elseif(USING_QT_UI)
 			SDL/SDLJoystick.h
 			SDL/SDLJoystick.cpp
 		)
-		set(nativeExtraLibs ${nativeExtraLibs} SDL2::SDL2)
+		set(nativeExtraLibs ${nativeExtraLibs} SDL2::Main)
 	endif()
 
 elseif(WIN32)
@@ -987,6 +988,7 @@ elseif(WIN32)
 	else()
 		link_directories(dx9sdk/Lib/x86)
 	endif()
+
 elseif(TARGET SDL2::SDL2)
 	set(TargetBin PPSSPPSDL)
 	# Require SDL
@@ -1024,7 +1026,6 @@ endif()
 if(TARGET SDL2::SDL2)
 	target_link_libraries(Common SDL2::SDL2)
 endif()
-
 
 list(APPEND NativeAppSource
 	android/jni/TestRunner.cpp
