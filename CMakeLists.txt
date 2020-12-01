@@ -1335,9 +1335,9 @@ if(WIN32)
 	list(APPEND GPU_IMPLS ${GPU_D3D9} ${GPU_D3D11})
 endif()
 
-if(ARMV7 OR ARM64)
+#if(ARMV7 OR ARM64)
 	set(GPU_NEON GPU/Common/TextureDecoderNEON.cpp)
-endif()
+#endif()
 set(GPU_SOURCES
 	${GPU_IMPLS}
 	${GPU_NEON}
