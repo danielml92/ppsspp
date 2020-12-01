@@ -328,10 +328,7 @@ void ARM64XEmitter::FlushIcacheSection(const u8 *start, const u8 *end)
 	sys_cache_control(kCacheFunctionPrepareForExecution, (void *)start, end - start);
 #elif PPSSPP_PLATFORM(WINDOWS)
 	FlushInstructionCache(GetCurrentProcess(), start, end - start);
-#elif PPSSPP_ARCH(ARM64) && !PPSSPP_PLATFORM(MAC)
-	// Mac ARM64 doesn't need this - it's WX exclusive and it will flush
-	// during the transitions I guess.
-
+#elif PPSSPP_ARCH(ARM64)
 	// Code from Dolphin, contributed by the Mono project.
 
 	// Don't rely on GCC's __clear_cache implementation, as it caches
